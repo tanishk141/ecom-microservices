@@ -138,7 +138,6 @@ services:
       - product-service
       - order-service
 
-#These are my volumes
 volumes:
   mysql:
   mongo_data:
