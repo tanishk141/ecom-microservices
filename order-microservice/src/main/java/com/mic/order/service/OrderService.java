@@ -7,12 +7,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 import com.mic.order.Repository.OrderRepository;
 import com.mic.order.controller.OrderController;
@@ -29,14 +27,14 @@ public class OrderService {
 	@Autowired
 	private OrderRepository orderRepository ;
 	
-	@Autowired
-	private WebClient.Builder webClientBuilder;
+	// @Autowired
+	// private WebClient.Builder webClientBuilder;
 	
 	@Autowired
 	private KafkaTemplate kafkaTemplate ;
 	
 	@Autowired
-	private  RestTemplate restTemplate;
+	private  RestClient restClient;
  	
 	private static final Logger LOGGER =LoggerFactory.getLogger(OrderController.class);
 	
@@ -71,24 +69,13 @@ public class OrderService {
 	
 	
 	// call Inventory Service before placing the order , if available then only place the order
-    InventoryResponse [] inventoryResponseArray = webClientBuilder.build().get()
-			 .uri("http://inventoryService/api/inventory/skuCode",
-					 uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build())
-			 .retrieve()
-			 .bodyToMono(InventoryResponse[].class)
-			 .block();
-	
-    // sync communication using RestTemplate
-    
-    // Define the inventory service URL
-//    String inventoryServiceUrl = "http://inventoryService/api/inventory/skuCode";
-//
-//    // Use RestTemplate to call the inventory service
-//    InventoryResponse[] inventoryResponseArray = restTemplate.getForObject(
-//            inventoryServiceUrl + "?skuCode={skuCodes}",
-//            InventoryResponse[].class,
-//            String.join(",", skuCodes) // Join SKU codes with commas
-//    );
+    // sync communication using RestClient
+
+	InventoryResponse [] inventoryResponseArray = restClient.get() 
+                                                            .uri("http://inventoryService/api/inventory/skuCode",
+					                                                      uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build()) 
+  														   	.retrieve()
+  															.body(InventoryResponse [].class);
     
     boolean allProductsInStock = true;
 
@@ -101,7 +88,7 @@ public class OrderService {
     
 	if(allProductsInStock) {
 		orderRepository.save(order);
-	kafkaTemplate.send("notificationTopic", order.getOrderNo());
+	    kafkaTemplate.send("notificationTopic", order.getOrderNo());
 		LOGGER.info("Order placed");
 
 	}
