@@ -6,11 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="api-gateway" />
         <module name="product-microservice" />
+        <module name="discovery-server" />
         <module name="order-microservice" />
-        <module name="demo" />
         <module name="inventory-microservice" />
+        <module name="api-gateway" />
+        <module name="notification-microservice" />
+        <module name="demo" />
       </profile>
     </annotationProcessing>
   </component>
@@ -18,7 +20,9 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
       <module name="demo" options="-parameters" />
+      <module name="discovery-server" options="-parameters" />
       <module name="inventory-microservice" options="-parameters" />
+      <module name="notification-microservice" options="-parameters" />
       <module name="order-microservice" options="-parameters" />
       <module name="product-microservice" options="-parameters" />
     </option>

@@ -2,6 +2,9 @@ package com.mic.product.model;
 
 import java.math.BigDecimal;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,7 +21,8 @@ public class Product {
 	private String name ;
 	private String description ;
 	private BigDecimal price ;
-	 
+	
+
 	public String getId() {
 		return id;
 	}
