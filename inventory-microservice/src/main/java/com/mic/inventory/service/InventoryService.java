@@ -48,10 +48,10 @@ public class InventoryService {
 					.orElse(null);
 
 			if (inventory != null) {
-				// SKU exists → Update quantity
+				// sku exist update quantity
 				inventory.setQuantity(inventory.getQuantity() + request.getQuantity());
 			} else {
-				// SKU does not exist → Create new inventory record
+				// sku does not exist then create new inventory record
 				inventory = new Inventory();
 				inventory.setSkuCode(request.getSkuCode());
 				inventory.setQuantity(request.getQuantity());

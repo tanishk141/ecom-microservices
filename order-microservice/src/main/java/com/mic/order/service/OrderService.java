@@ -26,15 +26,12 @@ public class OrderService {
 	
 	@Autowired
 	private OrderRepository orderRepository ;
-	
-	// @Autowired
-	// private WebClient.Builder webClientBuilder;
-	
+
 	@Autowired
 	private KafkaTemplate kafkaTemplate ;
 	
 	@Autowired
-	private  RestClient restClient;
+	private  RestClient.Builder restClientBuilder;
  	
 	private static final Logger LOGGER =LoggerFactory.getLogger(OrderController.class);
 	
@@ -71,8 +68,9 @@ public class OrderService {
 	// call Inventory Service before placing the order , if available then only place the order
     // sync communication using RestClient
 
-	InventoryResponse [] inventoryResponseArray = restClient.get() 
-                                                            .uri("http://inventoryService/api/inventory/skuCode",
+	InventoryResponse [] inventoryResponseArray = restClientBuilder.build()
+															.get()
+                                                            .uri("http://inventory-microservice/api/inventory/skuCode",
 					                                                      uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build()) 
   														   	.retrieve()
   															.body(InventoryResponse [].class);

@@ -15,13 +15,10 @@ public class WebClientConfig {
 		
 		return WebClient.builder();
 	}
+
 	
 	@Bean
-	public RestClient restClient() {
-		return RestClient.create();
-	}
-	
-	@Bean
+	@LoadBalanced
 	public RestClient.Builder restClientBuilder() {
 		return RestClient.builder();
 	}
