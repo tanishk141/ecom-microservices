@@ -1,6 +1,12 @@
 version: '3.8'
 
 services:
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
   # MongoDB Service for Product
   mongo:
     image: mongo:latest  # Replace with your desired MongoDB version
