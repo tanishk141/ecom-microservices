@@ -12,7 +12,7 @@
 	<groupId>com.mic</groupId>
 	<artifactId>product-microservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>project-microservice</name>
+	<name>product-microservice</name>
 	<description>Spring Boot Microservice Project</description>
 	<url />
 	<licenses>

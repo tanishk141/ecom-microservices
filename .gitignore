@@ -43,3 +43,4 @@ secrets.yml
 node_modules
 .env
 /.env
+docker-compose.yml

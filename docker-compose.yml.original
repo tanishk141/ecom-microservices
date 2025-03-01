@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  zipkin-server:
+    image: openzipkin/zipkin
+    container_name: zipkin-server
+    ports:
+      - "9411:9411"
+
+  ## Kafka Zookeeper Service
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  ## Kafka Broker Service
+  broker:
+    image: confluentinc/cp-kafka:7.0.0
+    container_name: broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  # MongoDB Service for Product
+  mongo:
+    image: mongo:latest  # Replace with your desired MongoDB version
+    container_name: mongo
+    ports:
+      - "27018:27017"  # Exposes MongoDB on localhost:27018
+    volumes:
+      - mongo_data:/tmp/db  # Persists MongoDB data
+    restart: unless-stopped
+
+  ## MySQL Service
+  mysql:
+    image: mysql:latest   # Replace with your desired MySQL version
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: master  # Replace with a strong root password
+      MYSQL_DATABASE: inventory-service
+      MYSQL_USER: root  # Replace with your desired username
+      MYSQL_PASSWORD: master  # Replace with your desired password
+    volumes:
+      - mysql:/var/lib/mysql  # Persists database data
+    ports:
+      - "3304:3306"  # Maps MySQL container port 3306 to localhost port 3304
+    restart: unless-stopped
+
+  ## Eureka Discovery Server
+  discovery-server:
+    image: tanish314/discovery-server:compose
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - zipkin-server
+
+  ## Product Service
+  product-service:
+    image: tanish314/product-microservice:compose
+    ports:
+      - "65513:65513"
+    container_name: product-service
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+        - discovery-server
+        - mongo
+        - zipkin-server
+
+  ## Notification Service
+  notification-service:
+    image: tanish314/notification-microservice:compose
+    ports:
+      - "65515:65515"
+    container_name: notification-service
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - broker
+      - discovery-server
+      - zipkin-server
+
+  # Inventory Service
+  inventory-service:
+    image: tanish314/inventory-microservice:compose
+    ports:
+      - "65514:65514"
+    container_name: inventory-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mysql
+      - discovery-server
+      - zipkin-server
+
+  # Order Service
+  order-service:
+    image: tanish314/order-microservice:compose
+    ports:
+      - "8081:8081"
+    container_name: order-service
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on: 
+      - broker
+      - mysql
+      - discovery-server
+      - inventory-service
+      - notification-service
+      - zipkin-server
+
+
+  # API Gateway Service
+  api-gateway:
+    image: tanish314/api-gateway:compose
+    container_name: api-gateway
+    ports:
+      - "8086:8086"
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - discovery-server
+      - product-service
+      - order-service
+      - zipkin-server
+
+volumes:
+  mysql:
+  mongo_data:
