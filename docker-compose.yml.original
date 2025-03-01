@@ -1,68 +1,11 @@
 version: '3.8'
 
 services:
-  zipkin:
+  zipkin-server:
     image: openzipkin/zipkin
-    container_name: zipkin
+    container_name: zipkin-server
     ports:
       - "9411:9411"
-
-  # MongoDB Service for Product
-  mongo:
-    image: mongo:latest  # Replace with your desired MongoDB version
-    container_name: mongo
-    ports:
-      - "27017:27017"  # Exposes MongoDB on localhost:27017
-    volumes:
-      - mongo_data:/tmp/db  # Persists MongoDB data
-    # healthcheck:
-    #   test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
-    restart: unless-stopped
-
-  ## Eureka Discovery Server
-  discovery-server:
-    image: tanish314/discovery-server:compose
-    container_name: discovery-server
-    ports:
-      - "8761:8761"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://discovery-server:8761/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    environment:
-     - SPRING_PROFILES_ACTIVE=docker
-
-  ## Product Service
-  product-service:
-    image: tanish314/product-microservice:compose
-    ports:
-      - "65513:65513"
-    container_name: product-service
-    environment:
-     - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-        - discovery-server
-        - mongo
-
-  ## MySQL Service
-  mysql:
-    image: mysql:latest   # Replace with your desired MySQL version
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: master  # Replace with a strong root password
-      MYSQL_DATABASE: inventory-service
-      MYSQL_USER: tanish  # Replace with your desired username
-      MYSQL_PASSWORD: master  # Replace with your desired password
-    volumes:
-      - mysql:/var/lib/mysql  # Persists database data
-    ports:
-      - "3304:3306"  # Maps MySQL container port 3306 to localhost port 3304
-    restart: unless-stopped
-
 
   ## Kafka Zookeeper Service
   zookeeper:
@@ -91,6 +34,55 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
+  # MongoDB Service for Product
+  mongo:
+    image: mongo:latest  # Replace with your desired MongoDB version
+    container_name: mongo
+    ports:
+      - "27018:27017"  # Exposes MongoDB on localhost:27018
+    volumes:
+      - mongo_data:/tmp/db  # Persists MongoDB data
+    restart: unless-stopped
+
+  ## MySQL Service
+  mysql:
+    image: mysql:latest   # Replace with your desired MySQL version
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: master  # Replace with a strong root password
+      MYSQL_DATABASE: inventory-service
+      MYSQL_USER: root  # Replace with your desired username
+      MYSQL_PASSWORD: master  # Replace with your desired password
+    volumes:
+      - mysql:/var/lib/mysql  # Persists database data
+    ports:
+      - "3304:3306"  # Maps MySQL container port 3306 to localhost port 3304
+    restart: unless-stopped
+
+  ## Eureka Discovery Server
+  discovery-server:
+    image: tanish314/discovery-server:compose
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - zipkin-server
+
+  ## Product Service
+  product-service:
+    image: tanish314/product-microservice:compose
+    ports:
+      - "65513:65513"
+    container_name: product-service
+    environment:
+     - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+        - discovery-server
+        - mongo
+        - zipkin-server
+
   ## Notification Service
   notification-service:
     image: tanish314/notification-microservice:compose
@@ -102,6 +94,7 @@ services:
     depends_on:
       - broker
       - discovery-server
+      - zipkin-server
 
   # Inventory Service
   inventory-service:
@@ -114,6 +107,7 @@ services:
     depends_on:
       - mysql
       - discovery-server
+      - zipkin-server
 
   # Order Service
   order-service:
@@ -129,6 +123,7 @@ services:
       - discovery-server
       - inventory-service
       - notification-service
+      - zipkin-server
 
 
   # API Gateway Service
@@ -143,6 +138,7 @@ services:
       - discovery-server
       - product-service
       - order-service
+      - zipkin-server
 
 volumes:
   mysql:

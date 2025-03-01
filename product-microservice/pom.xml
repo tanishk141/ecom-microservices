@@ -12,7 +12,7 @@
 	<groupId>com.mic</groupId>
 	<artifactId>product-microservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>project-microservice</name>
+	<name>product-microservice</name>
 	<description>Spring Boot Microservice Project</description>
 	<url />
 	<licenses>
@@ -33,6 +33,12 @@
 
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
