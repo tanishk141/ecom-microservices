@@ -24,6 +24,7 @@ WORKDIR /app
 
 # Copy the built JAR file from the previous stage
 COPY --from=build /app/target/*.jar app.jar
+COPY ../.env .
 
 # Expose the application's port
 EXPOSE 8761

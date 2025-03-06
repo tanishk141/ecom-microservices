@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   zipkin-server:
     image: openzipkin/zipkin
@@ -59,12 +61,10 @@ services:
 
   ## Eureka Discovery Server
   discovery-server:
-    image: vreddy1910/discovery-service:v1
+    image: tanish314/discovery-server:compose
     container_name: discovery-server
     ports:
       - "8761:8761"
-    env_file:
-      - .env
     environment:
      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -72,12 +72,10 @@ services:
 
   ## Product Service
   product-service:
-    image: vreddy1910/product-service:v1
+    image: tanish314/product-microservice:compose
     ports:
       - "65513:65513"
     container_name: product-service
-    env_file:
-      - .env
     environment:
      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -87,12 +85,10 @@ services:
 
   ## Notification Service
   notification-service:
-    image: vreddy1910/notification-service:v1
+    image: tanish314/notification-microservice:compose
     ports:
       - "65515:65515"
     container_name: notification-service
-    env_file:
-      - .env
     environment:
      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -102,12 +98,10 @@ services:
 
   # Inventory Service
   inventory-service:
-    image: vreddy1910/inventory-service:v1
+    image: tanish314/inventory-microservice:compose
     ports:
       - "65514:65514"
     container_name: inventory-service
-    env_file:
-      - .env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -117,12 +111,10 @@ services:
 
   # Order Service
   order-service:
-    image: vreddy1910/order-service:v1
+    image: tanish314/order-microservice:compose
     ports:
       - "8081:8081"
     container_name: order-service
-    env_file:
-      - .env
     environment:
      - SPRING_PROFILES_ACTIVE=docker
     depends_on: 
@@ -136,10 +128,8 @@ services:
 
   # API Gateway Service
   api-gateway:
-    image: vreddy1910/api-gateway-service:v1
+    image: tanish314/api-gateway:compose
     container_name: api-gateway
-    env_file:
-      - .env
     ports:
       - "8086:8086"
     environment:
